@@ -15,6 +15,7 @@ provider "kubernetes" {}
 
 provider "helm" {}
 
+# gitea
 resource "kubernetes_namespace" "gitea" {
   metadata {
     name = "gitea"
@@ -45,7 +46,6 @@ persistence:
   size: 10Gi
 EOF
   ]
-  force_update = true
 }
 
 data "kubernetes_service" "gitea" {
@@ -54,4 +54,19 @@ data "kubernetes_service" "gitea" {
     namespace = kubernetes_namespace.gitea.metadata[0].name
   }
   depends_on = [helm_release.gitea]
+}
+
+# argocd
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = "argocd"
+  }
+}
+
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = "7.8.9"
+  namespace  = "argocd"
 }
